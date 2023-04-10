@@ -1,4 +1,5 @@
-﻿#include<iostream>
+﻿#define _CRT_SECURE_NO_WARNINGS
+#include<iostream>
 using namespace std;
 class Fraction;
 Fraction operator*(Fraction left, Fraction right);
@@ -46,13 +47,25 @@ public:
 		this->denominator = 1;
 		cout << "DefaultConstructor:\t" << this << endl;
 	}
-	Fraction(int integer)
+	/*explicit*/ Fraction(int integer)
 	{
 		this->integer = integer;
 		this->numerator = 0;
 		this->denominator = 1;
 		cout << "1ArgConstructor:\t" << this << endl;
 	}
+
+		Fraction(double decimal)
+		{
+			decimal += 1e-10;
+			integer = decimal;	//Сохраняем целую часть десятичной дроби
+			decimal -= integer;	//Убираем целую часть из десятичной дроби
+			denominator = 1e+9;	//Записываем максиммально возможный знаменатель
+			numerator = decimal * denominator;//Всю дробную часть десятичной дроби загружаем в числитель
+			reduce();
+			cout << "1ArgConstructor:\t" << this << endl;
+		}
+
 	Fraction(int numerator, int denominator)
 	{
 		this->integer = 0;
@@ -180,6 +193,17 @@ public:
 		integer++;
 		return old;
 	}
+
+//			Type-cast operators;
+	explicit operator int()
+	{
+		return integer;
+	
+	}
+	explicit operator double()const
+	{
+		return integer + (double)numerator / denominator;
+	}
 };
 
 Fraction operator*(Fraction left, Fraction right)
@@ -290,11 +314,49 @@ std::ostream& operator<<(std::ostream& os, const Fraction& obj)
 	}
 	else if (obj.get_integer() == 0)cout << 0;
 	return os;
+
 }
-
-
+std::istream& operator>>(std::istream& is, Fraction& obj)
+{
+	const int SIZE = 256;
+	char buffer[SIZE] = {};
+	//is >> buffer;
+	is.getline(buffer, SIZE);
+	const char delimiters[] = "( /)";
+	int number[3] = {}; // cдесь будут храниться числа, введенные с клавиатуры
+	int n = 0; // счетчик чисел
+	for (char* pch = strtok(buffer, delimiters); pch; pch = strtok(NULL, delimiters))
+	{
+		//pch хранит адрес начало токина
+		//в функцию strtok() только первый раз передается делима строка, при всех последующих
+		//вызовах на место делимой строки нужно передавать NULL.
+		//Это показывает функции strtok() что она работает с ранее переданой строкой.
+		//если делимую строку передать еще раз, то strtok() начнет обрабатывать ее с начало.
+		number[n++] = atoi(pch);
+		//atoi() - ASCII - string To Integer (эта функция преобразует строку в значение типа int)
+ 	}
+	obj = Fraction();
+	switch (n)
+	{
+	case 1:obj.set_integer(number[0]); break;
+	case 2:
+		obj.set_numerator(number[0]);
+		obj.set_denominator(number[1]);
+		break;
+	case 3:
+		obj.set_integer(number[0]);
+		obj.set_numerator(number[1]);
+		obj.set_denominator(number[2]);
+	}
+	return is;
+}
 //#define CONSTRUCTORS_CHECK
 //#define ARITHMETICAL_OPERATORS_CHECK
+//#define CONVERSIONS_FROM_OTHER_TYPES_TO_CLASS
+//#define ISTREAM_OPERATOR_CHECK
+//#define CONVERSION_FROM_OTHER_TO_CLASS
+//#define CONVERSION_FROM_CLASS_TO_OTHER
+
 
 void main()
 {
@@ -358,6 +420,7 @@ void main()
 		i.print();
 	}
 #endif // ARITHMETICAL_OPERATORS_CHECK
+#ifdef CONVERSIONS_FROM_OTHER_TYPES_TO_CLASS
 	Fraction A(2, 3, 4);
 	A.print();
 
@@ -370,5 +433,41 @@ void main()
 	cout << A << "\t" << B << endl;
 	(A <= B) ? cout << "Первая дробь больше или равна второй" << endl : cout << "Первая дробь меньше и не равна второй" << endl;
 	cout << A << "\t" << B << endl;
-	
+#endif // CONVERSIONS_FROM_OTHER_TYPES_TO_CLASS
+#ifdef ISTREAM_OPERATOR_CHECK
+	Fraction A(123, 32, 45);
+	cout << "Введите простую дробь: "; cin >> A;
+	A.to_proper();
+	cout << A << endl;
+
+	int x = -312;
+	cout << x << endl;
+	int y = ~x + 1;
+	cout << y << endl;
+#endif // ISTREAM_OPERATOR_CHECK
+#ifdef CONVERSION_FROM_OTHER_TO_CLASS
+	int a = 2;     //No conversion
+	double b = 3;  //conversion from less to more
+	int c = b;     //conversion from more to less without data loss
+	int d = 2.5;   //Conversion from more to less with data loss
+
+	Fraction A = (Fraction)5;		//Conversion from other to class
+	cout << A << endl;
+	Fraction B;			//Default constructor
+	B = Fraction(8);				//Conversion from other to Class produced by assignment operator
+	cout << B << endl;
+#endif // CONVERSION_FROM_OTHER_TO_CLASS
+#ifdef CONVERSION_FROM_CLASS_TO_OTHER
+	Fraction A(2, 3, 4);
+	cout << A << endl;
+	int a = (int)A;
+	cout << a << endl;
+	double b = (double)A;
+	cout << b << endl;
+
+
+#endif // CONVERSION_FROM_CLASS_TO_OTHER
+	Fraction A = 22.86;
+	cout << A << endl;
+
 }

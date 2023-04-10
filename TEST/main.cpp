@@ -2,6 +2,7 @@
 #include<bitset>
 #define t "\t"
 using namespace std;
+
 void main()
 {
 	setlocale(LC_ALL, "");
@@ -28,7 +29,7 @@ void main()
 	cout << x << endl << endl;
 	int z = x & y; // побитовое И - если оба бита равны 1 = возвращается 1
 	cout << "x & y = " <<bitset<sizeof(x) * 1>(x) << t << bitset<sizeof(y) * 1>(y) << endl;
-	cout << "z = " << bitset<sizeof(z) * 1>(z) <<  t <<z << endl;
+	cout << "z = " << bitset<sizeof(z) * 1>(z) <<  t << z << endl;
 	z = x | y; // побитовое ИЛИ - фактически если хоть 1 бит равень 1  = возвращается 1
 	cout << "x | y = " <<bitset<sizeof(x) * 1>(x) << t << bitset<sizeof(y) * 1>(y) << endl;
 	cout << "z = " << bitset<sizeof(z) * 1>(z) << t << z << endl;
